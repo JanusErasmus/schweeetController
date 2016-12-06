@@ -1,5 +1,6 @@
 #ifndef TERMINAL_H_
 #define TERMINAL_H_
+#include <stdio.h>
 #include <avr/pgmspace.h>
 
 #define printp(_x, ...) printf_P(PSTR(_x), ##__VA_ARGS__);

@@ -53,10 +53,11 @@ void cTerminal::run()
 uint8_t cTerminal::parseCommand(char *command, uint8_t argc, char **argv)
 {
 	uint8_t count = 0;
+	argc -= 2;
 	argv[count] = command;
 	char *ptr = strchr(argv[count], ' ');
 
-	while(ptr && (count++ < 5))
+	while(ptr && (count++ < argc))
 	{
 		ptr[0] = 0;
 		ptr++;

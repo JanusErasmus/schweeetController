@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <float.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -8,6 +9,8 @@
 #include "led.h"
 #include "heartbeat.h"
 #include "input.h"
+#include "analog.h"
+#include "button.h"
 
 void watchdogReset() {
   __asm__ __volatile__ (
@@ -15,12 +18,34 @@ void watchdogReset() {
   );
 }
 
-void tryDebug(uint8_t argc, char **argv)
+cAnalog in1(4);
+cAnalog in2(5);
+cAnalog in3(6);
+cAnalog in4(7);
+
+void measureTemp(uint8_t argc, char **argv)
 {
-	printp("Mains Debug %d\n", argc);
+	printp("Measuring temp:\n");
+
+	double sample = in1.sample();
+	double temp = 500 * (sample/1024.0) - 273.0;
+	printf(" 1: %.1f\n", temp);
+
+	sample = in2.sample();
+	temp = 500 * (sample/1024.0) - 273.0;
+	printf(" 2: %.1f\n", temp);
+
+	sample = in3.sample();
+	temp = 5 * (sample/1024.0);
+	printf(" 3: %.1f\n", temp);
+
+	sample = in4.sample();
+	temp = 5 * (sample/1024.0);
+	printf(" 4: %.1f\n", temp);
 }
 
-extern const dbg_entry mainEntry = {tryDebug, "debug"};
+extern const dbg_entry mainEntry = {measureTemp, "temp"};
+
 
 /* main program starts here */
 int main(void)
@@ -71,11 +96,13 @@ int main(void)
 
 
 		Terminal.run();
-
 		heartbeat.run();
+		Buttons.run();
 
 		_delay_ms(100);
+
 	}
 
 	return 0;
 }
+
