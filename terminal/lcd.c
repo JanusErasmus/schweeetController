@@ -266,12 +266,16 @@ static uint8_t lcd_read(uint8_t rs)
 loops while lcd is busy, returns address counter
 *************************************************************************/
 static uint8_t lcd_waitbusy(void)
-
 {
+	uint8_t cnt = 0;
      uint8_t c;
     
     /* wait until busy flag is cleared */
-    while ( (c=lcd_read(0)) & (1<<LCD_BUSY)) {}
+    while ( (c=lcd_read(0)) & (1<<LCD_BUSY))
+    {
+    	if(cnt++ > 200)
+    		break;
+    }
     
     /* the address counter is updated 4us after the busy flag is cleared */
     delay(LCD_DELAY_BUSY_FLAG);
