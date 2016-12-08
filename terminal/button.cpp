@@ -1,11 +1,13 @@
-#include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include "terminal.h"
+#include <terminal.h>
 #include "button.h"
+
+//#define BUTTON_DEBUG
 
 cButtons::cButtons()
 {
+	mListener = 0;
 	mPressed = 0;
 	PCICR = 1 << PCIE1;
 	PCMSK1 = _BV(PCINT11) | _BV(PCINT12) | _BV(PCINT13) | _BV(PCINT14) | _BV(PCINT15);
@@ -27,23 +29,37 @@ void cButtons::handleButton(uint8_t buttons)
 
 void cButtons::run()
 {
-
 	switch(mPressed)
 	{
 	case 11:
+#ifdef BUTTON_DEBUG
 		printp("UP\n");
+#endif
+		if(mListener) mListener->pressed(cButtonListner::MENU_UP);
 		break;
 	case 12:
+#ifdef BUTTON_DEBUG
 		printp("DOWN\n");
+#endif
+		if(mListener) mListener->pressed(cButtonListner::MENU_DOWN);
 		break;
 	case 13:
+#ifdef BUTTON_DEBUG
 		printp("LEFT\n");
+#endif
+		if(mListener) mListener->pressed(cButtonListner::MENU_LEFT);
 		break;
 	case 14:
+#ifdef BUTTON_DEBUG
 		printp("RIGHT\n");
+#endif
+		if(mListener) mListener->pressed(cButtonListner::MENU_RIGHT);
 		break;
 	case 15:
+#ifdef BUTTON_DEBUG
 		printp("ENTER\n");
+#endif
+		if(mListener) mListener->pressed(cButtonListner::MENU_ENTER);
 		break;
 	default:
 		break;

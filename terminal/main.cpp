@@ -4,74 +4,83 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdint.h>
+#include <stdlib.h>
 
-#include "terminal.h"
-#include "led.h"
-#include "heartbeat.h"
-#include "input.h"
-#include "analog.h"
-#include "button.h"
-#include "lcd.h"
+#include <terminal.h>
+#include <led.h>
+#include <heartbeat.h>
+#include <analog.h>
+#include <lcd.h>
 
-void watchdogReset() {
-  __asm__ __volatile__ (
-    "wdr\n"
-  );
+#include "temp_control.h"
+#include "menu_manager.h"
+
+void watchdogReset()
+{
+  __asm__ __volatile__ ( "wdr\n" );
 }
 
+cOutput backlight(PORT_PG(2));
 void backLight(uint8_t argc, char **argv)
 {
-//	if(argc > 1)
-//		LCDsetBacklight(1);
-//	else
-//		LCDsetBacklight(0);
+	if(argc > 1)
+		backlight.set();
+	else
+		backlight.reset();
 }
-
 extern const dbg_entry backlightEntry = {backLight, "light"};
 
-void post(cLED **leds, cOutput **outputs)
+cOutput relay1(PORT_PF(0));
+cOutput relay2(PORT_PF(1));
+cOutput relay3(PORT_PF(2));
+cOutput relay4(PORT_PF(3));
+void debugOut(uint8_t argc, char **argv)
 {
-	uint8_t k = 0;
-	if(leds)
+	cOutput *relay = 0;
+	if(argc > 1)
 	{
-		cLED *led = leds[k];
-		while(led)
+		uint8_t num = atoi(argv[1]);
+		switch(num)
 		{
-			led->red();
-			led = leds[++k];
+		case 1:
+			relay = &relay1;
+			break;
+		case 2:
+			relay = &relay2;
+			break;
+		case 3:
+			relay = &relay3;
+			break;
+		case 4:
+			relay = &relay4;
+			break;
+		default:
+			return;
 		}
-		_delay_ms(200);
-		k = 0;
-		led = leds[k];
-		while(led)
-		{
-			led->green();
-			led = leds[++k];
-		}
-		_delay_ms(200);
-		k = 0;
-		led = leds[k];
-		while(led)
-		{
-			led->off();
-			led = leds[++k];
-		}
-	}
 
-	k = 0;
-	if(outputs)
-	{
-		cOutput *rl = outputs[k];
-		while(rl)
+		if(argc > 2)
 		{
-			rl->set();
-			_delay_ms(200);
-			rl->reset();
-			_delay_ms(200);
-			rl = outputs[++k];
+			bool state = atoi(argv[2]);
+			printp("%s - ", state?"set":"reset", num);
+			if(state)
+				relay->set();
+			else
+				relay->reset();
 		}
+
+		bool state = relay->get();
+		printp("RL%d: %s\n", num, state?"ON":"OFF");
+	}
+	else
+	{
+		printp("RL1: %s\n", relay1.get()?"ON":"OFF");
+		printp("RL2: %s\n", relay2.get()?"ON":"OFF");
+		printp("RL3: %s\n", relay3.get()?"ON":"OFF");
+		printp("RL4: %s\n", relay4.get()?"ON":"OFF");
 	}
 }
+extern const dbg_entry outputEntry = {debugOut, "o"};
+
 
 cAnalog in1(4);
 cAnalog in2(5);
@@ -100,25 +109,6 @@ void measureTemp(uint8_t argc, char **argv)
 }
 
 extern const dbg_entry mainEntry = {measureTemp, "temp"};
-
-
-void showTemp(cAnalog *tempProbe)
-{
-	static uint8_t cnt = 20;
-
-	if(cnt++ < 10)
-		return;
-
-	cnt = 0;
-
-	lcd_gotoxy(0,1);
-	char text[16];
-	double sample = tempProbe->sample();
-	double temp = 500 * (sample/1024.0) - 273.0;
-
-	sprintf(text,"% 3.1f%cC", temp, 223);
-    lcd_puts(text);
-}
 
 
 /* main program starts here */
@@ -151,54 +141,21 @@ int main(void)
 	cOutput led4green(0x27);
 	cLED led4(&led4red, &led4green);
 
-	cOutput relay1(PORT_PF(0));
-	cOutput relay2(PORT_PF(1));
-	cOutput relay3(PORT_PF(2));
-	cOutput relay4(PORT_PF(3));
+	cHeartbeat heartbeat(&status);
 
-//	cLED *leds[] =
-//	{
-//			&led1,
-//			&led2,
-//			&led3,
-//			&led4,
-//			0
-//	};
-//	cOutput *outs[] =
-//	{
-//			&relay1,
-//			&relay2,
-//			&relay3,
-//			&relay4,
-//			0
-//	};
-//	post(leds, outs);
-
-	cInput sw1(PORT_PJ(2));
-	cInput sw2(PORT_PJ(3));
-	cInput sw3(PORT_PJ(4));
-	cInput sw4(PORT_PJ(5));
-	cInput sw5(PORT_PJ(6));
+	cTempControl tempControl(&relay1, &led1, &in1);
 
 	lcd_init(LCD_DISP_ON);
 	lcd_clrscr();
-	lcd_home();
-	lcd_puts("Schweeet Control");
-
-
-	cHeartbeat heartbeat(&status);
+	cMenuManager menuManager(&backlight, &tempControl);
 
 	while(1)
 	{
 		watchdogReset();
 
-		showTemp(&in1);
-
-
 		Terminal.run();
 		heartbeat.run();
-		Buttons.run();
-
+		menuManager.run();
 
 		_delay_ms(100);
 	}
