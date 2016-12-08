@@ -102,40 +102,22 @@ void measureTemp(uint8_t argc, char **argv)
 extern const dbg_entry mainEntry = {measureTemp, "temp"};
 
 
-void loading()
+void showTemp(cAnalog *tempProbe)
 {
-	static uint8_t cnt = 0;
-	static bool upDown = true;
-	static uint8_t progress = 0;
+	static uint8_t cnt = 20;
 
-//	if(cnt++ < 10)
-//		return;
+	if(cnt++ < 10)
+		return;
 
 	cnt = 0;
 
-	lcd_gotoxy(4,1);
+	lcd_gotoxy(0,1);
 	char text[16];
-	sprintf(text,"%d", progress);
-    lcd_puts(text);
+	double sample = tempProbe->sample();
+	double temp = 500 * (sample/1024.0) - 273.0;
 
-	if(upDown)
-	{
-		progress += 5;
-		if(progress > 100)
-		{
-			progress = 100;
-			upDown = false;
-		}
-	}
-	else
-	{
-		progress -= 5;
-		if(progress <= 5)
-		{
-			progress = 0;
-			upDown = true;
-		}
-	}
+	sprintf(text,"% 3.1f%cC", temp, 223);
+    lcd_puts(text);
 }
 
 
@@ -210,7 +192,7 @@ int main(void)
 	{
 		watchdogReset();
 
-		loading();
+		showTemp(&in1);
 
 
 		Terminal.run();
