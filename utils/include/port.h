@@ -31,6 +31,8 @@ protected:
 public:
 	cPort(uint8_t pin_definition);
 	virtual ~cPort();
+
+	bool get();
 };
 
 #endif /* PORT_H_ */

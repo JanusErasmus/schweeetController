@@ -335,7 +335,7 @@ extern void lcd_putc(char c);
 */
 extern void lcd_puts(const char *s);
 
-
+#define lcd_putp(_x)  lcd_puts_p(PSTR(_x))
 /**
  @brief    Display string from program memory without auto linefeed
  @param    progmem_s string from program memory be be displayed                                        

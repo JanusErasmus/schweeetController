@@ -153,6 +153,7 @@ int main(void)
 	{
 		watchdogReset();
 
+		tempControl.run();
 		Terminal.run();
 		heartbeat.run();
 		menuManager.run();

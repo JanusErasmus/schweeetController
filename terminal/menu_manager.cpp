@@ -18,7 +18,7 @@ cMenuManager::cMenuManager(cOutput *backlight, cTempControl *tempControl) : mBac
 
 void cMenuManager::updateTemperature()
 {
-	double temp = mTempControl->temp();
+	double temp = mTempControl->getTemp();
 	char text[16];
 	lcd_gotoxy(0,1);
 	sprintf(text,"% 3.1f%cC", temp, 223);

@@ -273,7 +273,7 @@ static uint8_t lcd_waitbusy(void)
     /* wait until busy flag is cleared */
     while ( (c=lcd_read(0)) & (1<<LCD_BUSY))
     {
-    	if(cnt++ > 200)
+    	if(cnt++ > 400)
     		break;
     }
     

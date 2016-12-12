@@ -90,6 +90,17 @@ void cPort::clearPORTn()
 	*port &= ~(1 << (mPinDefinition & 0x0F));
 }
 
+
+bool cPort::get()
+{
+	 volatile uint8_t *port = PINn_reg();
+
+	 if( *port & (1 << (mPinDefinition & 0x0F)))
+		 return true;
+
+	 return false;
+}
+
 cPort::~cPort()
 {
 }
