@@ -16,6 +16,7 @@ class cTempControl
 		sIntegralVariables();
 	};
 
+	bool mEnabled;
 	cOutput *mRelay;
 	cLED *mLED;
 	cAnalog *mAnalog;
@@ -25,8 +26,8 @@ class cTempControl
 
 	sIntegralVariables mIntegral;
 
-	void enable();
-	void disable();
+	void setHeater(bool state);
+
 
 	void doIntegralControl(float temp);
 
@@ -35,6 +36,9 @@ public:
 	virtual ~cTempControl();
 
 	void run();
+
+	void enable();
+	void disable();
 
 	float getTemp();
 };

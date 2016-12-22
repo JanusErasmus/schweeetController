@@ -9,11 +9,12 @@
 #include <terminal.h>
 #include <led.h>
 #include <heartbeat.h>
-#include <analog.h>
+#include <analog_sampler.h>
 #include <lcd.h>
 
 #include "temp_control.h"
 #include "menu_manager.h"
+#include "seven_segment.h"
 
 void watchdogReset()
 {
@@ -82,28 +83,28 @@ void debugOut(uint8_t argc, char **argv)
 extern const dbg_entry outputEntry = {debugOut, "o"};
 
 
-cAnalog in1(4);
-cAnalog in2(5);
-cAnalog in3(6);
-cAnalog in4(7);
+cAnalog analogIn1(4);
+cAnalog analogIn2(5);
+cAnalog analogIn3(6);
+cAnalog analogIn4(7);
 
 void measureTemp(uint8_t argc, char **argv)
 {
 	printp("Measuring temp:\n");
 
-	double sample = in1.sample();
+	double sample = analogIn1.lastSample();
 	double temp = 500 * (sample/1024.0) - 273.0;
 	printf(" 1: %.1f\n", temp);
 
-	sample = in2.sample();
+	sample = analogIn2.lastSample();
 	temp = 500 * (sample/1024.0) - 273.0;
 	printf(" 2: %.1f\n", temp);
 
-	sample = in3.sample();
+	sample = analogIn3.lastSample();
 	temp = 5 * (sample/1024.0);
 	printf(" 3: %.1f\n", temp);
 
-	sample = in4.sample();
+	sample = analogIn4.lastSample();
 	temp = 5 * (sample/1024.0);
 	printf(" 4: %.1f\n", temp);
 }
@@ -143,16 +144,28 @@ int main(void)
 
 	cHeartbeat heartbeat(&status);
 
-	cTempControl tempControl(&relay1, &led1, &in1);
+	cTempControl tempControl(&relay1, &led1, &analogIn1);
 
 	lcd_init(LCD_DISP_ON);
 	lcd_clrscr();
-	cMenuManager menuManager(&backlight, &tempControl);
+	cMenuManager menuManager(&backlight);
+
+	cAnalog *analogList[] =
+	{
+			&analogIn1,
+			&analogIn2,
+			&analogIn3,
+			&analogIn4,
+	};
+	cAnalogSampler analogSampler(analogList, 4);
+
+	cSevenSegment segment;
 
 	while(1)
 	{
 		watchdogReset();
 
+		analogSampler.run();
 		tempControl.run();
 		Terminal.run();
 		heartbeat.run();

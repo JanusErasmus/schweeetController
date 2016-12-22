@@ -2,23 +2,20 @@
 #define MENU_MANAGER_H_
 #include <output.h>
 
-
 class cMenu;
 #include "menu.h"
 #include "button.h"
-#include "temp_control.h"
 
 class cMenuManager: public cButtonListner
 {
 	uint16_t mLightTimeout;
 	cOutput *mBacklight;
 	cMenu *mCurrentMenu;
-	cTempControl *mTempControl;
 
-	void updateTemperature();
+	void updateTemperature(double temp);
 
 public:
-	cMenuManager(cOutput *backlight, cTempControl *tempControl);
+	cMenuManager(cOutput *backlight);
 	virtual ~cMenuManager();
 
 	void run();

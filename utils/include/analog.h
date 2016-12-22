@@ -4,13 +4,14 @@
 class cAnalog
 {
 	uint8_t mChannel;
-
+	uint16_t mLastSample;
 
 public:
 	cAnalog(uint8_t channel);
 	virtual ~cAnalog();
 
 	uint16_t sample();
+	uint16_t lastSample(){ return mLastSample; };
 };
 
 #endif /* ANALOG_H_ */

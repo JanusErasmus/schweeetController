@@ -2,6 +2,7 @@
 
 #include <terminal.h>
 #include "temp_control.h"
+#include "seven_segment.h"
 
 #define SAMPLE_PERIOD 10  //set to be 1 second
 #define OFF_TIME 60
@@ -12,20 +13,33 @@ cTempControl::cTempControl(cOutput *relay, cLED *led, cAnalog *analog) :
 			mAnalog(analog)
 
 {
+	mEnabled = false;
 	mCount = SAMPLE_PERIOD;
 	mSetPoint = 80;
 }
 
+void cTempControl::setHeater(bool state)
+{
+	if(state)
+	{
+		mRelay->set();
+		mLED->green();
+	}
+	else
+	{
+		mRelay->reset();
+		mLED->off();
+	}
+}
+
 void cTempControl::enable()
 {
-	mRelay->set();
-	mLED->green();
+	mEnabled = true;
 }
 
 void cTempControl::disable()
 {
-	mRelay->reset();
-	mLED->off();
+	mEnabled = false;
 }
 
 void cTempControl::doIntegralControl(float temp)
@@ -38,7 +52,7 @@ void cTempControl::doIntegralControl(float temp)
 
 		mIntegral.offtime = OFF_TIME;
 
-		disable();
+		setHeater(false);
 
 	}
 	else
@@ -64,21 +78,29 @@ void cTempControl::doIntegralControl(float temp)
 		printp("%03.1f - set %ds\n", temp, mIntegral.ontime);
 
 		if(mIntegral.ontime)
-			enable();
+			setHeater(true);
 	}
 }
 
 void cTempControl::run()
 {
+
 	if(mCount--)
 		return;
 	mCount = SAMPLE_PERIOD;
 
 	float temp = getTemp();
+	SevenSegment.setNumber(temp);
+
+	if(!mEnabled)
+	{
+		mLED->red();
+		return;
+	}
 
 	if(temp < (mSetPoint - 5))
 	{
-		enable();
+		setHeater(true);
 	}
 	else
 		doIntegralControl(temp);
@@ -87,7 +109,7 @@ void cTempControl::run()
 
 float cTempControl::getTemp()
 {
-	double sample = mAnalog->sample();
+	double sample = mAnalog->lastSample();
 	double temp = 500 * (sample/1024.0) - 273.0;
 	return temp;
 }

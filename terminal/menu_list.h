@@ -4,6 +4,11 @@
 
 class cMenuList : public cMenu
 {
+	uint8_t mItem;
+	uint8_t mRow;
+
+	void fillDisplay();
+
 public:
 	cMenuList(cMenuManager *manager);
 	virtual ~cMenuList();

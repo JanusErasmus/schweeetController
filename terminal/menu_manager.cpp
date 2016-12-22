@@ -8,17 +8,15 @@
 
 #define BACKLIGHT_TIMEOUT 100
 
-cMenuManager::cMenuManager(cOutput *backlight, cTempControl *tempControl) : mBacklight(backlight), mTempControl(tempControl)
+cMenuManager::cMenuManager(cOutput *backlight) : mBacklight(backlight)
 {
 	mLightTimeout = BACKLIGHT_TIMEOUT;
 	Buttons.setListener(this);
 	mCurrentMenu = new cMenuStanby(this);
-	updateTemperature();
 }
 
-void cMenuManager::updateTemperature()
+void cMenuManager::updateTemperature(double temp)
 {
-	double temp = mTempControl->getTemp();
 	char text[16];
 	lcd_gotoxy(0,1);
 	sprintf(text,"% 3.1f%cC", temp, 223);
@@ -36,7 +34,6 @@ void cMenuManager::run()
 	mBacklight->reset();
 
 	setCurrentMenu(new cMenuStanby(this));
-	updateTemperature();
 }
 
 void cMenuManager::pressed(cButtonListner::eButtons button)

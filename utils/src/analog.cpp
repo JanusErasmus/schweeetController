@@ -5,6 +5,7 @@
 
 cAnalog::cAnalog(uint8_t channel) : mChannel(channel)
 {
+	mLastSample = sample();
 }
 
 uint16_t cAnalog::sample()
@@ -34,7 +35,9 @@ uint16_t cAnalog::sample()
 	//disable ADC
 	ADCSRA = 0;
 
-	return (sum >> 4);
+	mLastSample = (sum >> 4);
+
+	return mLastSample;
 }
 
 cAnalog::~cAnalog()
