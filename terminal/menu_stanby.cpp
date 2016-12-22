@@ -4,7 +4,7 @@
 #include <terminal.h>
 
 #include "menu_stanby.h"
-#include "menu_list.h"
+#include "menu_main.h"
 
 cMenuStanby::cMenuStanby(cMenuManager *manager) : cMenu(manager)
 {
@@ -17,7 +17,7 @@ cMenuStanby::cMenuStanby(cMenuManager *manager) : cMenu(manager)
 
 void cMenuStanby::handleButton(cButtonListner::eButtons button)
 {
-	cMenu *menu = new cMenuList(mManager);
+	cMenu *menu = new cMenuMain(mManager);
 	mManager->setCurrentMenu(menu);
 }
 

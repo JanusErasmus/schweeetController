@@ -3,52 +3,14 @@
 #include <avr/pgmspace.h>
 
 #include "menu_list.h"
-#include "menu_stanby.h"
 
 #define DISPLAY_ROWS 2
 
-void setLED()
-{
-	printp("Set led\n");
-}
-
-void setupController()
-{
-	printp("Setup\n");
-}
-
-void goBack()
-{
-	printp("Setup\n");
-}
-
-struct menuItems
-{
-	const char *itemName PROGMEM;
-	void (*itemFuction)(void);
-};
-
-const menuItems mainMenu[] PROGMEM =
-{
-		{"1. Set LED", setLED},
-		{"2. Setup", setupController},
-		{"3. Back", goBack}
-};
-
-//static const char menuList[][16] PROGMEM =
-//{
-//		{"1. Set LED"},
-//		{"2. Setup"},
-//		{"3. Start"},
-//		{"4. Stop"},
-//		{"5. Back"},
-//		{"\0"}
-//};
-
-cMenuList::cMenuList(cMenuManager *manager) : cMenu(manager)
+cMenuList::cMenuList(cMenuManager *manager, const menuItems *items) : cMenu(manager), mItemList(items)
 {
 	mItem = 0;
 	mRow = 0;
+
 	fillDisplay();
 
 	lcd_command(LCD_DISP_ON_CURSOR_BLINK);
@@ -69,7 +31,7 @@ void  cMenuList::fillDisplay()
 	for(uint8_t k = 0; k < DISPLAY_ROWS; k++)
 	{
 		lcd_gotoxy(0,k);
-		lcd_puts_p(mainMenu[startRow++].itemName);
+		lcd_puts(mItemList[startRow++].itemName);
 	}
 
 	lcd_gotoxy(0,mRow);
@@ -86,7 +48,7 @@ void cMenuList::handleButton(cButtonListner::eButtons button)
 			mRow = DISPLAY_ROWS;
 
 		mItem++;
-		char item = pgm_read_byte(mainMenu[mItem].itemName);
+		char item = mItemList[mItem].itemName[0];
 		if(item == '\0')
 			mItem--;
 	}
@@ -100,25 +62,14 @@ void cMenuList::handleButton(cButtonListner::eButtons button)
 
 		break;
 	case cButtonListner::MENU_ENTER:
-		switch(mItem)
+	{
+		cMenu *menu = mItemList[mItem].itemFuction(mManager);
+		if(menu)
 		{
-		case 0:
-			printp("Set led\n");
-			break;
-		case 1:
-			printp("Setup\n");
-			break;
-		case 2:
-			printp("Start\n");
-			break;
-		case 3:
-			printp("Stop\n");
-			break;
-		case 4:
-		default:
-			mManager->setCurrentMenu(new cMenuStanby(mManager));
+			mManager->setCurrentMenu(menu);
 			return;
 		}
+	}
 		break;
 	default:
 		break;
