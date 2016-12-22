@@ -7,15 +7,43 @@
 
 #define DISPLAY_ROWS 2
 
-static const char menuList[][16] PROGMEM =
+void setLED()
 {
-		{"1. Set LED"},
-		{"2. Setup"},
-		{"3. Start"},
-		{"4. Stop"},
-		{"5. Back"},
-		{"\0"}
+	printp("Set led\n");
+}
+
+void setupController()
+{
+	printp("Setup\n");
+}
+
+void goBack()
+{
+	printp("Setup\n");
+}
+
+struct menuItems
+{
+	const char *itemName PROGMEM;
+	void (*itemFuction)(void);
 };
+
+const menuItems mainMenu[] PROGMEM =
+{
+		{"1. Set LED", setLED},
+		{"2. Setup", setupController},
+		{"3. Back", goBack}
+};
+
+//static const char menuList[][16] PROGMEM =
+//{
+//		{"1. Set LED"},
+//		{"2. Setup"},
+//		{"3. Start"},
+//		{"4. Stop"},
+//		{"5. Back"},
+//		{"\0"}
+//};
 
 cMenuList::cMenuList(cMenuManager *manager) : cMenu(manager)
 {
@@ -41,7 +69,7 @@ void  cMenuList::fillDisplay()
 	for(uint8_t k = 0; k < DISPLAY_ROWS; k++)
 	{
 		lcd_gotoxy(0,k);
-		lcd_puts_p(menuList[startRow++]);
+		lcd_puts_p(mainMenu[startRow++].itemName);
 	}
 
 	lcd_gotoxy(0,mRow);
@@ -58,7 +86,7 @@ void cMenuList::handleButton(cButtonListner::eButtons button)
 			mRow = DISPLAY_ROWS;
 
 		mItem++;
-		char item = pgm_read_byte(menuList[mItem]);
+		char item = pgm_read_byte(mainMenu[mItem].itemName);
 		if(item == '\0')
 			mItem--;
 	}
