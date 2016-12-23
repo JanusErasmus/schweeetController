@@ -7,10 +7,9 @@ class cAnalogSampler
 {
 	uint8_t mTick;
 	cAnalog **mAnalogInputs;
-	uint8_t mAnalogCount;
 
 public:
-	cAnalogSampler(cAnalog **analogInputs, uint8_t count);
+	cAnalogSampler(cAnalog **analogInputs);
 	virtual ~cAnalogSampler();
 
 	void run();

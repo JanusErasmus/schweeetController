@@ -1,5 +1,6 @@
 #ifndef ANALOG_H_
 #define ANALOG_H_
+#include <stdint.h>
 
 class cAnalog
 {

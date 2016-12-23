@@ -2,15 +2,14 @@
 
 #include <terminal.h>
 #include "temp_control.h"
-#include "seven_segment.h"
 
 #define SAMPLE_PERIOD 10  //set to be 1 second
 #define OFF_TIME 60
 
-cTempControl::cTempControl(cOutput *relay, cLED *led, cAnalog *analog) :
+cTempControl::cTempControl(cOutput *relay, cLED *led, cTempProbe *probe) :
 			mRelay(relay),
 			mLED(led),
-			mAnalog(analog)
+			mProbe(probe)
 
 {
 	mEnabled = false;
@@ -89,8 +88,6 @@ void cTempControl::run()
 		return;
 	mCount = SAMPLE_PERIOD;
 
-	float temp = getTemp();
-	SevenSegment.setNumber(temp);
 
 	if(!mEnabled)
 	{
@@ -98,6 +95,7 @@ void cTempControl::run()
 		return;
 	}
 
+	float temp = mProbe->getTemp();
 	if(temp < (mSetPoint - 5))
 	{
 		setHeater(true);
@@ -107,12 +105,7 @@ void cTempControl::run()
 
 }
 
-float cTempControl::getTemp()
-{
-	double sample = mAnalog->lastSample();
-	double temp = 500 * (sample/1024.0) - 273.0;
-	return temp;
-}
+
 
 cTempControl::~cTempControl()
 {

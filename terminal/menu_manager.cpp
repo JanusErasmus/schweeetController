@@ -3,16 +3,24 @@
 #include <lcd.h>
 
 #include "button.h"
+#include "seven_segment.h"
 #include "menu_manager.h"
 #include "menu_stanby.h"
 
 #define BACKLIGHT_TIMEOUT 100
 
-cMenuManager::cMenuManager(cOutput *backlight) : mBacklight(backlight)
+cMenuManager::cMenuManager(cOutput *backlight, cTempProbe **temperatureProbes) : mBacklight(backlight), mTempProbes(temperatureProbes)
 {
+	mSegmentProbe = mTempProbes[0];
 	mLightTimeout = BACKLIGHT_TIMEOUT;
 	Buttons.setListener(this);
 	mCurrentMenu = new cMenuStanby(this);
+
+	if(mSegmentProbe)
+	{
+		double temp = mSegmentProbe->getTemp();
+		SevenSegment.setNumber(temp);
+	}
 }
 
 void cMenuManager::updateTemperature(double temp)
@@ -33,6 +41,13 @@ void cMenuManager::run()
 	mLightTimeout = BACKLIGHT_TIMEOUT;
 	mBacklight->reset();
 
+
+	if(mSegmentProbe)
+	{
+		double temp = mSegmentProbe->getTemp();
+		SevenSegment.setNumber(temp);
+	}
+
 	setCurrentMenu(new cMenuStanby(this));
 }
 
@@ -51,6 +66,16 @@ void cMenuManager::setCurrentMenu(cMenu *menu)
 		delete mCurrentMenu;
 
 	mCurrentMenu = menu;
+}
+
+void cMenuManager::setSegmentProbeIndex(uint8_t index)
+{
+	if(mTempProbes[index])
+	{
+		mSegmentProbe = mTempProbes[index];
+		double temp = mSegmentProbe->getTemp();
+		SevenSegment.setNumber(temp);
+	}
 }
 
 cMenuManager::~cMenuManager()

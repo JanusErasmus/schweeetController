@@ -1,12 +1,13 @@
 #include <terminal.h>
+
 #include "menu_main.h"
 #include "menu_stanby.h"
+#include "menu_select_probe.h"
 
 
-cMenu *setLED(cMenuManager *manager)
+cMenu *selectProbe(cMenuManager *manager)
 {
-	printp("Set led\n");
-	return 0;
+	return new cMenuSelectProbe(manager);
 }
 
 cMenu *setupController(cMenuManager *manager)
@@ -23,7 +24,7 @@ cMenu *goBack(cMenuManager *manager)
 
 const cMenuList::menuItems mainMenu[] =
 {
-		{"1. Set LED", setLED},
+		{"1. Select probe", selectProbe},
 		{"2. Setup", setupController},
 		{"3. Back", goBack},
 		{"\0", 0}

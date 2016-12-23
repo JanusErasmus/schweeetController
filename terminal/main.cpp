@@ -118,8 +118,6 @@ int main(void)
 	WDTCSR = _BV(WDCE) | _BV(WDE);
 	WDTCSR = (_BV(WDP2) | _BV(WDP1) | _BV(WDP0) | _BV(WDE));
 
-	printp("Started\n");
-
 	sei();
 
 	cOutput statusRed(0x60);
@@ -144,11 +142,15 @@ int main(void)
 
 	cHeartbeat heartbeat(&status);
 
-	cTempControl tempControl(&relay1, &led1, &analogIn1);
+	cTempProbe probe1(cTempProbe::LM335, &analogIn1);
+	cTempProbe probe2(cTempProbe::LM335, &analogIn2);
+	cTempProbe probe3(cTempProbe::PT100, &analogIn3);
+	cTempProbe probe4(cTempProbe::PT100, &analogIn4);
+
+	cTempControl tempControl(&relay1, &led1, &probe1);
 
 	lcd_init(LCD_DISP_ON);
 	lcd_clrscr();
-	cMenuManager menuManager(&backlight);
 
 	cAnalog *analogList[] =
 	{
@@ -156,8 +158,20 @@ int main(void)
 			&analogIn2,
 			&analogIn3,
 			&analogIn4,
+			0
 	};
-	cAnalogSampler analogSampler(analogList, 4);
+	cAnalogSampler analogSampler(analogList);
+
+	cTempProbe *probeList[] =
+	{
+			&probe1,
+			&probe2,
+			&probe3,
+			&probe4,
+			0
+	};
+	cMenuManager menuManager(&backlight, probeList);
+
 
 	cSevenSegment segment;
 

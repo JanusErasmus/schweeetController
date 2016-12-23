@@ -2,7 +2,7 @@
 #define TEMP_CONTROL_H_
 #include <output.h>
 #include <led.h>
-#include <analog.h>
+#include "temp_probe.h"
 
 class cTempControl
 {
@@ -19,7 +19,7 @@ class cTempControl
 	bool mEnabled;
 	cOutput *mRelay;
 	cLED *mLED;
-	cAnalog *mAnalog;
+	cTempProbe *mProbe;
 	uint16_t mCount;
 
 	uint16_t mSetPoint;
@@ -32,15 +32,13 @@ class cTempControl
 	void doIntegralControl(float temp);
 
 public:
-	cTempControl(cOutput *relay, cLED *led, cAnalog *analog);
+	cTempControl(cOutput *relay, cLED *led, cTempProbe *probe);
 	virtual ~cTempControl();
 
 	void run();
 
 	void enable();
 	void disable();
-
-	float getTemp();
 };
 
 #endif /* TEMP_CONTROL_H_ */

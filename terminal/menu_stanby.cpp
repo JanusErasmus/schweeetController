@@ -8,7 +8,6 @@
 
 cMenuStanby::cMenuStanby(cMenuManager *manager) : cMenu(manager)
 {
-	printp("Stadnby menu\n");
 	lcd_clrscr();
 	lcd_command(LCD_DISP_ON);
 	lcd_gotoxy(5,0);
