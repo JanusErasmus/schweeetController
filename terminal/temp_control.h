@@ -6,6 +6,15 @@
 
 class cTempControl
 {
+public :
+	enum eControlStatus
+	{
+		STOPPED,
+		DIFFERENTIAL,
+		INTEGRAL
+	};
+
+private:
 	struct sIntegralVariables
 	{
 		bool onFlag;
@@ -16,7 +25,9 @@ class cTempControl
 		sIntegralVariables();
 	};
 
-	bool mEnabled;
+	eControlStatus mStatus;
+
+	bool mStarted;
 	cOutput *mRelay;
 	cLED *mLED;
 	cTempProbe *mProbe;
@@ -37,8 +48,11 @@ public:
 
 	void run();
 
-	void enable();
-	void disable();
+	void start();
+	void stop();
+
+	eControlStatus status(){ return mStatus; };
+	uint16_t setPoint(){ return mSetPoint; };
 };
 
 #endif /* TEMP_CONTROL_H_ */

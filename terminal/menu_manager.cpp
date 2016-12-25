@@ -6,12 +6,20 @@
 #include "seven_segment.h"
 #include "menu_manager.h"
 #include "menu_stanby.h"
+#include "nvm.h"
 
 #define BACKLIGHT_TIMEOUT 100
 
-cMenuManager::cMenuManager(cOutput *backlight, cTempProbe **temperatureProbes) : mBacklight(backlight), mTempProbes(temperatureProbes)
+cMenuManager::cMenuManager(cOutput *backlight, cTempProbe **temperatureProbes, cTempControl *controller) :
+	mBacklight(backlight),
+	mTempProbes(temperatureProbes),
+	mController(controller)
 {
-	mSegmentProbe = mTempProbes[0];
+	mSegmentProbe = 0;
+	uint8_t selectedProbe = eeprom_read_byte(ADDRES_SELECTED_PROBE);
+	if((selectedProbe != 0xFF) && mTempProbes[selectedProbe])
+		mSegmentProbe = mTempProbes[selectedProbe];
+
 	mLightTimeout = BACKLIGHT_TIMEOUT;
 	Buttons.setListener(this);
 	mCurrentMenu = new cMenuStanby(this);
@@ -72,6 +80,8 @@ void cMenuManager::setSegmentProbeIndex(uint8_t index)
 {
 	if(mTempProbes[index])
 	{
+		eeprom_write_byte(ADDRES_SELECTED_PROBE, index);
+
 		mSegmentProbe = mTempProbes[index];
 		double temp = mSegmentProbe->getTemp();
 		SevenSegment.setNumber(temp);

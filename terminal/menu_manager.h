@@ -6,6 +6,7 @@ class cMenu;
 #include "menu.h"
 #include "button.h"
 #include "temp_probe.h"
+#include "temp_control.h"
 
 class cMenuManager: public cButtonListner
 {
@@ -14,11 +15,12 @@ class cMenuManager: public cButtonListner
 	cMenu *mCurrentMenu;
 	cTempProbe **mTempProbes;
 	cTempProbe *mSegmentProbe;
+	cTempControl *mController;
 
 	void updateTemperature(double temp);
 
 public:
-	cMenuManager(cOutput *backlight, cTempProbe **temperatureProbes);
+	cMenuManager(cOutput *backlight, cTempProbe **temperatureProbes, cTempControl *controller);
 	virtual ~cMenuManager();
 
 	void run();
@@ -29,6 +31,8 @@ public:
 
 	cTempProbe **getTemperaturePorts(){ return mTempProbes; };
 	void setSegmentProbeIndex(uint8_t index);
+
+	cTempControl *getController(){ return mController; };
 };
 
 #endif /* MENU_MANAGER_H_ */

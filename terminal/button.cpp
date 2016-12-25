@@ -1,4 +1,5 @@
 #include <avr/interrupt.h>
+#include <util/delay.h>
 
 #include <terminal.h>
 #include "button.h"
@@ -75,9 +76,9 @@ cButtons::~cButtons()
 
 ISR(PCINT1_vect)
 {
-	uint8_t pins = ~PINJ;
+	_delay_us(5);
 
-	Buttons.handleButton(pins);
+	Buttons.handleButton(~PINJ);
 }
 
 cButtons Buttons;

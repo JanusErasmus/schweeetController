@@ -12,7 +12,8 @@ cTempControl::cTempControl(cOutput *relay, cLED *led, cTempProbe *probe) :
 			mProbe(probe)
 
 {
-	mEnabled = false;
+	mStarted = false;
+	mStatus = STOPPED;
 	mCount = SAMPLE_PERIOD;
 	mSetPoint = 80;
 }
@@ -27,18 +28,20 @@ void cTempControl::setHeater(bool state)
 	else
 	{
 		mRelay->reset();
-		mLED->off();
+		mLED->red();
 	}
 }
 
-void cTempControl::enable()
+void cTempControl::start()
 {
-	mEnabled = true;
+	mStarted = true;
+	mStatus = DIFFERENTIAL;
 }
 
-void cTempControl::disable()
+void cTempControl::stop()
 {
-	mEnabled = false;
+	mStarted = false;
+	mStatus = STOPPED;
 }
 
 void cTempControl::doIntegralControl(float temp)
@@ -89,19 +92,24 @@ void cTempControl::run()
 	mCount = SAMPLE_PERIOD;
 
 
-	if(!mEnabled)
+	if(!mStarted)
 	{
-		mLED->red();
+		mLED->off();
+		mRelay->reset();
 		return;
 	}
 
 	float temp = mProbe->getTemp();
 	if(temp < (mSetPoint - 5))
 	{
+		mStatus = DIFFERENTIAL;
 		setHeater(true);
 	}
 	else
+	{
+		mStatus = INTEGRAL;
 		doIntegralControl(temp);
+	}
 
 }
 

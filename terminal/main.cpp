@@ -170,7 +170,7 @@ int main(void)
 			&probe4,
 			0
 	};
-	cMenuManager menuManager(&backlight, probeList);
+	cMenuManager menuManager(&backlight, probeList, &tempControl);
 
 
 	cSevenSegment segment;
