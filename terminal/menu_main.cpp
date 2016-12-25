@@ -4,6 +4,7 @@
 #include "menu_stanby.h"
 #include "menu_select_probe.h"
 #include "menu_controller_status.h"
+#include "menu_setup_control.h"
 
 cMenu *statusController(cMenuManager *manager)
 {
@@ -37,8 +38,7 @@ cMenu *selectProbe(cMenuManager *manager)
 
 cMenu *setupController(cMenuManager *manager)
 {
-	printp("Setup\n");
-	return 0;
+	return new cMenuSetupControl(manager);
 }
 
 cMenu *goBack(cMenuManager *manager)
