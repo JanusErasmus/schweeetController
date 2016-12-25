@@ -24,10 +24,10 @@ cMenuStanby::cMenuStanby(cMenuManager *manager) : cMenu(manager)
 		case cTempControl::STOPPED:
 			return;
 		case cTempControl::DIFFERENTIAL:
-			sprintf(setPoint, "Heating %d%cC", control->setPoint(), 223);
+			sprintf(setPoint, "Heating to %d%cC", control->getSetPoint(), 223);
 			break;
 		case cTempControl::INTEGRAL:
-			sprintf(setPoint, "Control %d%cC", control->setPoint(), 223);
+			sprintf(setPoint, "Control for %d%cC", control->getSetPoint(), 223);
 			break;
 		}
 		lcd_puts(setPoint);

@@ -52,7 +52,8 @@ public:
 	void stop();
 
 	eControlStatus status(){ return mStatus; };
-	uint16_t setPoint(){ return mSetPoint; };
+	uint16_t getSetPoint(){ return mSetPoint; };
+	void setSetPoint(uint16_t setPoint){ mSetPoint = setPoint; };
 };
 
 #endif /* TEMP_CONTROL_H_ */

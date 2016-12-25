@@ -23,7 +23,7 @@ cMenuControllerStatus::cMenuControllerStatus(cMenuManager *manager) : cMenu(mana
 			lcd_putp("Started");
 			lcd_gotoxy(3,1);
 			char setPoint[16];
-			sprintf(setPoint, "Set @ %d%cC", control->setPoint(), 223);
+			sprintf(setPoint, "Set @ %d%cC", control->getSetPoint(), 223);
 			lcd_puts(setPoint);
 		}
 	}

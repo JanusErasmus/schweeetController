@@ -2,6 +2,7 @@
 
 #include <terminal.h>
 #include "temp_control.h"
+#include "nvm.h"
 
 #define SAMPLE_PERIOD 10  //set to be 1 second
 #define OFF_TIME 60
@@ -15,7 +16,7 @@ cTempControl::cTempControl(cOutput *relay, cLED *led, cTempProbe *probe) :
 	mStarted = false;
 	mStatus = STOPPED;
 	mCount = SAMPLE_PERIOD;
-	mSetPoint = 80;
+	mSetPoint = eeprom_read_byte(ADDRES_SETPOINT);
 }
 
 void cTempControl::setHeater(bool state)
