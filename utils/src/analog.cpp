@@ -5,13 +5,18 @@
 
 cAnalog::cAnalog(uint8_t channel) : mChannel(channel)
 {
-	mLastSample = sample();
+	mLastSample = 0;
+	sample();
+}
+uint16_t cAnalog::lastSample()
+{
+	return mLastSample;
 }
 
-uint16_t cAnalog::sample()
+void cAnalog::sample()
 {
 	if(mChannel > 7)
-		return 0;
+		return;
 
 	uint32_t sum = 0;
 
@@ -26,8 +31,17 @@ uint16_t cAnalog::sample()
 		//Start conversion
 		ADCSRA |= _BV(ADSC);
 
+		uint16_t cnt = 1000;
 		//wait for conversion
-		while(ADCSRA & _BV(ADSC));
+		while((ADCSRA & _BV(ADSC)) && cnt)
+		{
+			cnt--;
+			if(!cnt)
+			{
+				ADCSRA = 0;
+				return;
+			}
+		}
 
 		sum += ADC;
 	}
@@ -36,8 +50,6 @@ uint16_t cAnalog::sample()
 	ADCSRA = 0;
 
 	mLastSample = (sum >> 4);
-
-	return mLastSample;
 }
 
 cAnalog::~cAnalog()

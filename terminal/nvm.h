@@ -4,7 +4,8 @@
 #include <stdint.h>
 
 #define ADDRES_SELECTED_PROBE 	0 			// 1B
-#define ADDRES_SETPOINT			(uint8_t*)1	//1B
+#define ADDRES_SETPOINT			(uint8_t*)1	// 1B
+#define ADDRES_CONTROLLING		(uint8_t*)2 // 1B
 
 
 

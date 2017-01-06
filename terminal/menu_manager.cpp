@@ -1,3 +1,4 @@
+#include <avr/interrupt.h>
 #include <stdio.h>
 
 #include <lcd.h>
@@ -23,6 +24,7 @@ cMenuManager::cMenuManager(cOutput *backlight, cTempProbe **temperatureProbes, c
 	mLightTimeout = BACKLIGHT_TIMEOUT;
 	Buttons.setListener(this);
 	mCurrentMenu = new cMenuStanby(this);
+	mEnabled = true;
 
 	if(mSegmentProbe)
 	{
@@ -61,6 +63,9 @@ void cMenuManager::run()
 
 void cMenuManager::pressed(cButtonListner::eButtons button)
 {
+	if(!mEnabled)
+		return;
+
 	mLightTimeout = BACKLIGHT_TIMEOUT;
 	mBacklight->set();
 
@@ -70,10 +75,14 @@ void cMenuManager::pressed(cButtonListner::eButtons button)
 
 void cMenuManager::setCurrentMenu(cMenu *menu)
 {
+	disable();
+
 	if(mCurrentMenu)
 		delete mCurrentMenu;
 
 	mCurrentMenu = menu;
+
+	enable();
 }
 
 void cMenuManager::setSegmentProbeIndex(uint8_t index)

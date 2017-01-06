@@ -4,8 +4,11 @@
 
 class cButtonListner
 {
+protected:
+	bool mEnabled;
+
 public:
-	cButtonListner(){};
+	cButtonListner();
 	virtual ~cButtonListner(){};
 
 	enum eButtons
@@ -18,6 +21,9 @@ public:
 		MENU_BACK
 	};
 
+	void enable();
+	void disable();
+
 	virtual void pressed(eButtons button) = 0;
 };
 
@@ -29,6 +35,7 @@ class cButtons
 public:
 	cButtons();
 	virtual ~cButtons();
+
 
 	void setListener(cButtonListner *menu){ mListener = menu; };
 	void handleButton(uint8_t button);

@@ -13,7 +13,7 @@ cTempControl::cTempControl(cOutput *relay, cLED *led, cTempProbe *probe) :
 			mProbe(probe)
 
 {
-	mStarted = false;
+	mStarted = eeprom_read_byte(ADDRES_CONTROLLING);
 	mStatus = STOPPED;
 	mCount = SAMPLE_PERIOD;
 	mSetPoint = eeprom_read_byte(ADDRES_SETPOINT);
@@ -36,12 +36,15 @@ void cTempControl::setHeater(bool state)
 void cTempControl::start()
 {
 	mStarted = true;
+	eeprom_write_byte(ADDRES_CONTROLLING, mStarted);
 	mStatus = DIFFERENTIAL;
+	setHeater(false);
 }
 
 void cTempControl::stop()
 {
 	mStarted = false;
+	eeprom_write_byte(ADDRES_CONTROLLING, mStarted);
 	mStatus = STOPPED;
 }
 
@@ -87,7 +90,6 @@ void cTempControl::doIntegralControl(float temp)
 
 void cTempControl::run()
 {
-
 	if(mCount--)
 		return;
 	mCount = SAMPLE_PERIOD;
@@ -101,7 +103,7 @@ void cTempControl::run()
 	}
 
 	float temp = mProbe->getTemp();
-	if(temp < (mSetPoint - 5))
+	if(temp < ((float)mSetPoint - 5.0))
 	{
 		mStatus = DIFFERENTIAL;
 		setHeater(true);

@@ -17,20 +17,21 @@ cMenuStanby::cMenuStanby(cMenuManager *manager) : cMenu(manager)
 	if(control)
 	{
 		lcd_gotoxy(0,1);
-		char setPoint[16];
+		uint8_t setPoint = control->getSetPoint();
+		char setPointString[32];
 		cTempControl::eControlStatus status = control->status();
 		switch(status)
 		{
 		case cTempControl::STOPPED:
 			return;
 		case cTempControl::DIFFERENTIAL:
-			sprintf(setPoint, "Heating to %d%cC", control->getSetPoint(), 223);
+			sprintf(setPointString, "Heating to %d%cC", setPoint, 223);
 			break;
 		case cTempControl::INTEGRAL:
-			sprintf(setPoint, "Control for %d%cC", control->getSetPoint(), 223);
+			sprintf(setPointString, "Control for %d%cC", setPoint, 223);
 			break;
 		}
-		lcd_puts(setPoint);
+		lcd_puts(setPointString);
 	}
 }
 

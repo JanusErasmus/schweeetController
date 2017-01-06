@@ -6,12 +6,30 @@
 
 //#define BUTTON_DEBUG
 
+cButtonListner::cButtonListner()
+{
+	mEnabled = false;
+}
+
+void cButtonListner::enable()
+{
+	mEnabled = true;
+	sei();
+}
+
+void cButtonListner::disable()
+{
+	cli();
+	mEnabled = false;
+}
+
 cButtons::cButtons()
 {
 	mListener = 0;
 	mPressed = 0;
 	PCICR = 1 << PCIE1;
-	PCMSK1 = _BV(PCINT11) | _BV(PCINT12) | _BV(PCINT13) | _BV(PCINT14) | _BV(PCINT15);
+
+	PCMSK1 |= _BV(PCINT11) | _BV(PCINT12) | _BV(PCINT13) | _BV(PCINT14) | _BV(PCINT15);
 }
 
 void cButtons::handleButton(uint8_t buttons)
@@ -76,7 +94,7 @@ cButtons::~cButtons()
 
 ISR(PCINT1_vect)
 {
-	_delay_us(5);
+	_delay_us(5000);
 
 	Buttons.handleButton(~PINJ);
 }

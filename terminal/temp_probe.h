@@ -1,6 +1,7 @@
 #ifndef TEMP_PROBE_H_
 #define TEMP_PROBE_H_
 #include <analog.h>
+#include <float.h>
 
 class cTempProbe
 {
@@ -19,7 +20,7 @@ public:
 	cTempProbe(eType type, cAnalog *analog);
 	virtual ~cTempProbe();
 
-	double getTemp();
+	float getTemp();
 };
 
 #endif /* TEMP_PROBE_H_ */

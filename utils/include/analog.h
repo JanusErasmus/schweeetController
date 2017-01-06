@@ -11,8 +11,8 @@ public:
 	cAnalog(uint8_t channel);
 	virtual ~cAnalog();
 
-	uint16_t sample();
-	uint16_t lastSample(){ return mLastSample; };
+	void sample();
+	uint16_t lastSample();
 };
 
 #endif /* ANALOG_H_ */

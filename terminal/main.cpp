@@ -115,8 +115,8 @@ extern const dbg_entry mainEntry = {measureTemp, "temp"};
 /* main program starts here */
 int main(void)
 {
-	WDTCSR = _BV(WDCE) | _BV(WDE);
-	WDTCSR = (_BV(WDP2) | _BV(WDP1) | _BV(WDP0) | _BV(WDE));
+	//WDTCSR = _BV(WDCE) | _BV(WDE);
+	//WDTCSR = (_BV(WDP2) | _BV(WDP1) | _BV(WDP0) | _BV(WDE));
 
 	sei();
 
@@ -172,18 +172,17 @@ int main(void)
 	};
 	cMenuManager menuManager(&backlight, probeList, &tempControl);
 
-
 	cSevenSegment segment;
 
 	while(1)
 	{
 		watchdogReset();
 
-		analogSampler.run();
-		tempControl.run();
 		Terminal.run();
 		heartbeat.run();
 		menuManager.run();
+		analogSampler.run();
+		tempControl.run();
 
 		_delay_ms(100);
 	}

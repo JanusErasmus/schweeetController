@@ -1,10 +1,12 @@
+#include <stdio.h>
+
 #include "temp_probe.h"
 
 cTempProbe::cTempProbe(eType type, cAnalog *analog) : mType(type), mAnalog(analog)
 {
 }
 
-double cTempProbe::getTemp()
+float cTempProbe::getTemp()
 {
 	double temp = 0;
 
@@ -12,7 +14,7 @@ double cTempProbe::getTemp()
 	{
 	case LM335:
 	{
-		double sample = mAnalog->lastSample();
+		float sample = mAnalog->lastSample();
 		temp = 500 * (sample/1024.0) - 273.0;
 	}
 	break;
@@ -21,6 +23,7 @@ double cTempProbe::getTemp()
 		break;
 	}
 
+	//printf("%f\n", temp);
 	return temp;
 }
 
