@@ -10,8 +10,9 @@ public :
 	enum eControlStatus
 	{
 		STOPPED,
-		DIFFERENTIAL,
-		INTEGRAL
+		HEATING,
+		IDLE,
+		COOLING
 	};
 
 private:
@@ -27,8 +28,8 @@ private:
 
 	eControlStatus mStatus;
 
-	bool mStarted;
 	cOutput *mRelay;
+	bool mLEDflag;
 	cLED *mLED;
 	cTempProbe *mProbe;
 	uint16_t mCount;

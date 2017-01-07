@@ -13,10 +13,17 @@ cTempControl::cTempControl(cOutput *relay, cLED *led, cTempProbe *probe) :
 			mProbe(probe)
 
 {
-	mStarted = eeprom_read_byte(ADDRES_CONTROLLING);
+	mLEDflag = false;
 	mStatus = STOPPED;
 	mCount = SAMPLE_PERIOD;
 	mSetPoint = eeprom_read_byte(ADDRES_SETPOINT);
+
+
+	bool started = eeprom_read_byte(ADDRES_CONTROLLING);
+	if(started)
+	{
+		mStatus = IDLE;
+	}
 }
 
 void cTempControl::setHeater(bool state)
@@ -29,22 +36,20 @@ void cTempControl::setHeater(bool state)
 	else
 	{
 		mRelay->reset();
-		mLED->red();
+		mLED->off();
 	}
 }
 
 void cTempControl::start()
 {
-	mStarted = true;
-	eeprom_write_byte(ADDRES_CONTROLLING, mStarted);
-	mStatus = DIFFERENTIAL;
+	eeprom_write_byte(ADDRES_CONTROLLING, true);
+	mStatus = IDLE;
 	setHeater(false);
 }
 
 void cTempControl::stop()
 {
-	mStarted = false;
-	eeprom_write_byte(ADDRES_CONTROLLING, mStarted);
+	eeprom_write_byte(ADDRES_CONTROLLING, false);
 	mStatus = STOPPED;
 }
 
@@ -58,6 +63,7 @@ void cTempControl::doIntegralControl(float temp)
 
 		mIntegral.offtime = OFF_TIME;
 
+		mStatus = IDLE;
 		setHeater(false);
 
 	}
@@ -84,33 +90,59 @@ void cTempControl::doIntegralControl(float temp)
 		printp("%03.1f - set %ds\n", temp, mIntegral.ontime);
 
 		if(mIntegral.ontime)
+		{
+			mStatus = HEATING;
 			setHeater(true);
+		}
 	}
 }
 
 void cTempControl::run()
 {
+	switch(mStatus)
+	{
+	case STOPPED:
+	{
+		mLED->off();
+		mRelay->reset();
+	}
+	return;
+	case HEATING:
+	{
+		if(mLEDflag)
+		{
+			mLEDflag = false;
+			mLED->off();
+		}
+		else
+		{
+			mLEDflag = true;
+			mLED->green();
+		}
+	}
+	break;
+	case IDLE:
+	{
+		mLED->green();
+		mRelay->reset();
+	}
+	break;
+	case COOLING:
+		break;
+	}
+
 	if(mCount--)
 		return;
 	mCount = SAMPLE_PERIOD;
 
-
-	if(!mStarted)
-	{
-		mLED->off();
-		mRelay->reset();
-		return;
-	}
-
 	float temp = mProbe->getTemp();
 	if(temp < ((float)mSetPoint - 5.0))
 	{
-		mStatus = DIFFERENTIAL;
+		mStatus = HEATING;
 		setHeater(true);
 	}
 	else
 	{
-		mStatus = INTEGRAL;
 		doIntegralControl(temp);
 	}
 

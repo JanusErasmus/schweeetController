@@ -22,7 +22,7 @@ cMenuSelectProbe::cMenuSelectProbe(cMenuManager *manager) : cMenu(manager)
 	char text[16];
 	while(port)
 	{
-		sprintf(text,"%d %2.1f%cC", k + 1, port->getTemp(), 223);
+		sprintf(text,"%d %2.1f%cC", k + 1, (double)port->getTemp(), 223);
 		setCursor(k);
 		lcd_puts(text);
 
