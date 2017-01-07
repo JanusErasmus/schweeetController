@@ -39,7 +39,7 @@ private:
 
 	sIntegralVariables mIntegral;
 
-	void setHeater(bool state, float temp = 0);
+	void setHeater(bool state, float temp = DISABLED_TEMPERATURE);
 
 
 	void doIntegralControl(float temp);

@@ -9,12 +9,14 @@ class cHeater
 	cOutput *mHeaterRelay;
 	float mTemperature;
 
+	bool checkHeating(float temp);
+
 public:
 	cHeater(cOutput *heaterRelay);
 	virtual ~cHeater();
 
 	bool on(float temperature = DISABLED_TEMPERATURE);
-	void off();
+	bool off(float temperature = DISABLED_TEMPERATURE);
 };
 
 #endif /* HEATER_H_ */

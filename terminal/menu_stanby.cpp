@@ -22,14 +22,17 @@ cMenuStanby::cMenuStanby(cMenuManager *manager) : cMenu(manager)
 		cTempControl::eControlStatus status = control->status();
 		switch(status)
 		{
-		default:
-			return;
 		case cTempControl::HEATING:
 			sprintf(statusString, "Heating to %d%cC", setPoint, 223);
 			break;
 		case cTempControl::IDLE:
 			sprintf(statusString, "Control for %d%cC", setPoint, 223);
 			break;
+		case cTempControl::FAILURE:
+			sprintf(statusString, "Heater failure");
+			break;
+		default:
+			return;
 		}
 		lcd_puts(statusString);
 	}
