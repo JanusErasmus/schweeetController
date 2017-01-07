@@ -33,14 +33,13 @@ void cTempControl::setHeater(bool state, float temp)
 		if(!mHeater->on(temp))
 		{
 			mStatus = FAILURE;
-			mLED->red();
 			return;
 		}
+		mStatus = HEATING;
 	}
 	else
 	{
-		mHeater->off();
-		mLED->off();
+		mStatus = IDLE;
 	}
 }
 
@@ -72,9 +71,7 @@ void cTempControl::doIntegralControl(float temp)
 
 		mIntegral.offtime = OFF_TIME;
 
-		mStatus = IDLE;
 		setHeater(false, temp);
-
 	}
 	else
 	{
@@ -100,7 +97,6 @@ void cTempControl::doIntegralControl(float temp)
 
 		if(mIntegral.ontime)
 		{
-			mStatus = HEATING;
 			setHeater(true, temp);
 		}
 	}
@@ -161,7 +157,6 @@ void cTempControl::run()
 	float temp = mProbe->getTemp();
 	if(temp < ((float)mSetPoint - 5.0))
 	{
-		mStatus = HEATING;
 		setHeater(true, temp);
 	}
 	else
