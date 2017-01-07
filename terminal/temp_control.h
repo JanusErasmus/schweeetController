@@ -1,8 +1,8 @@
 #ifndef TEMP_CONTROL_H_
 #define TEMP_CONTROL_H_
-#include <output.h>
 #include <led.h>
 #include "temp_probe.h"
+#include "heater.h"
 
 class cTempControl
 {
@@ -12,7 +12,8 @@ public :
 		STOPPED,
 		HEATING,
 		IDLE,
-		COOLING
+		COOLING,
+		FAILURE
 	};
 
 private:
@@ -28,7 +29,7 @@ private:
 
 	eControlStatus mStatus;
 
-	cOutput *mRelay;
+	cHeater *mHeater;
 	bool mLEDflag;
 	cLED *mLED;
 	cTempProbe *mProbe;
@@ -38,13 +39,13 @@ private:
 
 	sIntegralVariables mIntegral;
 
-	void setHeater(bool state);
+	void setHeater(bool state, float temp = 0);
 
 
 	void doIntegralControl(float temp);
 
 public:
-	cTempControl(cOutput *relay, cLED *led, cTempProbe *probe);
+	cTempControl(cHeater *heater, cLED *led, cTempProbe *probe);
 	virtual ~cTempControl();
 
 	void run();

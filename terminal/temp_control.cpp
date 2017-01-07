@@ -7,8 +7,8 @@
 #define SAMPLE_PERIOD 10  //set to be 1 second
 #define OFF_TIME 60
 
-cTempControl::cTempControl(cOutput *relay, cLED *led, cTempProbe *probe) :
-			mRelay(relay),
+cTempControl::cTempControl(cHeater *heater, cLED *led, cTempProbe *probe) :
+			mHeater(heater),
 			mLED(led),
 			mProbe(probe)
 
@@ -26,16 +26,20 @@ cTempControl::cTempControl(cOutput *relay, cLED *led, cTempProbe *probe) :
 	}
 }
 
-void cTempControl::setHeater(bool state)
+void cTempControl::setHeater(bool state, float temp)
 {
 	if(state)
 	{
-		mRelay->set();
-		mLED->green();
+		if(!mHeater->on(temp))
+		{
+			mStatus = FAILURE;
+			mLED->red();
+			return;
+		}
 	}
 	else
 	{
-		mRelay->reset();
+		mHeater->off();
 		mLED->off();
 	}
 }
@@ -51,6 +55,11 @@ void cTempControl::stop()
 {
 	eeprom_write_byte(ADDRES_CONTROLLING, false);
 	mStatus = STOPPED;
+
+	mIntegral.offtime = 0;
+	mIntegral.onFlag = true;
+	mIntegral.ontime = 0;
+	mIntegral.setOnTime = 0;
 }
 
 void cTempControl::doIntegralControl(float temp)
@@ -64,7 +73,7 @@ void cTempControl::doIntegralControl(float temp)
 		mIntegral.offtime = OFF_TIME;
 
 		mStatus = IDLE;
-		setHeater(false);
+		setHeater(false, temp);
 
 	}
 	else
@@ -92,7 +101,7 @@ void cTempControl::doIntegralControl(float temp)
 		if(mIntegral.ontime)
 		{
 			mStatus = HEATING;
-			setHeater(true);
+			setHeater(true, temp);
 		}
 	}
 }
@@ -104,7 +113,7 @@ void cTempControl::run()
 	case STOPPED:
 	{
 		mLED->off();
-		mRelay->reset();
+		mHeater->off();
 	}
 	return;
 	case HEATING:
@@ -124,11 +133,25 @@ void cTempControl::run()
 	case IDLE:
 	{
 		mLED->green();
-		mRelay->reset();
+		mHeater->off();
 	}
 	break;
 	case COOLING:
 		break;
+	case FAILURE:
+	{
+		if(mLEDflag)
+		{
+			mLEDflag = false;
+			mLED->off();
+		}
+		else
+		{
+			mLEDflag = true;
+			mLED->red();
+		}
+	}
+	break;
 	}
 
 	if(mCount--)
@@ -139,7 +162,7 @@ void cTempControl::run()
 	if(temp < ((float)mSetPoint - 5.0))
 	{
 		mStatus = HEATING;
-		setHeater(true);
+		setHeater(true, temp);
 	}
 	else
 	{

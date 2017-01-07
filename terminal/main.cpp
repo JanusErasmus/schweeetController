@@ -147,7 +147,9 @@ int main(void)
 	cTempProbe probe3(cTempProbe::PT100, &analogIn3);
 	cTempProbe probe4(cTempProbe::PT100, &analogIn4);
 
-	cTempControl tempControl(&relay1, &led1, &probe1);
+	cHeater heater(&relay1);
+
+	cTempControl tempControl(&heater, &led1, &probe1);
 
 	lcd_init(LCD_DISP_ON);
 	lcd_clrscr();
