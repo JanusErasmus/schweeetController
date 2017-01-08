@@ -26,22 +26,20 @@ cTempControl::cTempControl(cHeater *heater, cLED *led, cTempProbe *probe) :
 	}
 }
 
-void cTempControl::setHeater(bool state, float temp)
+void cTempControl::setHeater(bool state)
 {
-	bool heaterOK = true;
-
 	if(state)
 	{
-		heaterOK = mHeater->on(temp);
+		mHeater->on();
 		mStatus = HEATING;
 	}
 	else
 	{
-		heaterOK = mHeater->off(temp);
+		mHeater->off();
 		mStatus = IDLE;
 	}
 
-	if(!heaterOK)
+	if(!mHeater->OK())
 	{
 		mStatus = FAILURE;
 	}
@@ -57,7 +55,7 @@ void cTempControl::start()
 void cTempControl::stop()
 {
 	eeprom_write_byte(ADDRES_CONTROLLING, false);
-	mHeater->off();
+	mHeater->reset();
 	mStatus = STOPPED;
 
 	mIntegral.offtime = 0;
@@ -76,7 +74,7 @@ void cTempControl::doIntegralControl(float temp)
 
 		mIntegral.offtime = OFF_TIME;
 
-		setHeater(false, temp);
+		setHeater(false);
 	}
 	else
 	{
@@ -102,7 +100,7 @@ void cTempControl::doIntegralControl(float temp)
 
 		if(mIntegral.ontime)
 		{
-			setHeater(true, temp);
+			setHeater(true);
 		}
 	}
 }
@@ -160,7 +158,7 @@ void cTempControl::run()
 	float temp = mProbe->getTemp();
 	if(temp < ((float)mSetPoint - 5.0))
 	{
-		setHeater(true, temp);
+		setHeater(true);
 	}
 	else
 	{

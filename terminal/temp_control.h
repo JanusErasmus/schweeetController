@@ -1,6 +1,7 @@
 #ifndef TEMP_CONTROL_H_
 #define TEMP_CONTROL_H_
 #include <led.h>
+
 #include "temp_probe.h"
 #include "heater.h"
 
@@ -39,7 +40,7 @@ private:
 
 	sIntegralVariables mIntegral;
 
-	void setHeater(bool state, float temp = DISABLED_TEMPERATURE);
+	void setHeater(bool state);
 
 
 	void doIntegralControl(float temp);

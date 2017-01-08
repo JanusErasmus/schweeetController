@@ -147,7 +147,7 @@ int main(void)
 	cTempProbe probe3(cTempProbe::PT100, &analogIn3);
 	cTempProbe probe4(cTempProbe::PT100, &analogIn4);
 
-	cHeater heater(&relay1);
+	cHeater heater(&relay1, &probe1);
 
 	cTempControl tempControl(&heater, &led1, &probe1);
 
@@ -185,6 +185,7 @@ int main(void)
 		menuManager.run();
 		analogSampler.run();
 		tempControl.run();
+		heater.run();
 
 		_delay_ms(100);
 	}

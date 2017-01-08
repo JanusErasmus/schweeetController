@@ -2,51 +2,60 @@
 
 #include <stdio.h>
 
-cHeater::cHeater(cOutput *heaterRelay) : mHeaterRelay(heaterRelay), mTemperature(DISABLED_TEMPERATURE)
+#define RESPONSE_TIME 600  //set to be 60 seconds
+
+cHeater::cHeater(cOutput *heaterRelay, cTempProbe *probe) :
+		mProbe(probe),
+		mHeaterRelay(heaterRelay),
+		mTemperature(-999),
+		mSampleCount(-1),
+		mOK(true)
 {
+	mHeaterRelay->reset();
 }
 
-bool cHeater::on(float temperature)
+void cHeater::on()
 {
 	mHeaterRelay->set();
 
-	if(temperature == DISABLED_TEMPERATURE)
-		return true;
-
-	return checkHeating(temperature);
+	//check that temperature of heater rises after the heater response time
+	if(mSampleCount < 0)
+		mSampleCount = 0;
 }
 
-bool cHeater::off(float temperature)
+void cHeater::off()
 {
 	mHeaterRelay->reset();
-
-	if(temperature == DISABLED_TEMPERATURE)
-	{
-		mTemperature = DISABLED_TEMPERATURE;
-		return true;
-	}
-
-	return checkHeating(temperature);
 }
 
-bool cHeater::checkHeating(float temp)
+void cHeater::reset()
 {
-	if(mTemperature == DISABLED_TEMPERATURE)
+	mOK = true;
+	mTemperature = -999;
+	mSampleCount = -1;
+}
+
+void cHeater::run()
+{
+	if(mSampleCount >= 0)
 	{
-		mTemperature = temp;
-		return true;
+		if(mTemperature == -999)
+			mTemperature = mProbe->getTemp();
+
+		if(++mSampleCount > RESPONSE_TIME)
+		{
+			float temp = mProbe->getTemp();
+			if(temp < (mTemperature - 0.1))
+			{
+				mOK = false;
+				mHeaterRelay->reset();
+			}
+
+			//stop checking heater
+			mTemperature = -999;
+			mSampleCount = -1;
+		}
 	}
-
-	if(temp > mTemperature)
-	{
-		mTemperature = temp;
-		return true;
-	}
-
-	if(mTemperature > (temp + 1.0))
-		return false;
-
-	return true;
 }
 
 cHeater::~cHeater()

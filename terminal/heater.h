@@ -2,21 +2,27 @@
 #define HEATER_H_
 #include <output.h>
 
-#define DISABLED_TEMPERATURE -999
+#include "temp_probe.h"
 
 class cHeater
 {
+	cTempProbe *mProbe;
 	cOutput *mHeaterRelay;
 	float mTemperature;
 
-	bool checkHeating(float temp);
+	int16_t mSampleCount;
+	bool mOK;
 
 public:
-	cHeater(cOutput *heaterRelay);
+	cHeater(cOutput *heaterRelay, cTempProbe *probe);
 	virtual ~cHeater();
 
-	bool on(float temperature = DISABLED_TEMPERATURE);
-	bool off(float temperature = DISABLED_TEMPERATURE);
+	void run();
+	void on();
+	void off();
+	void reset();
+
+	bool OK(){ return mOK; };
 };
 
 #endif /* HEATER_H_ */
