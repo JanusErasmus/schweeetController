@@ -26,6 +26,7 @@ private:
 		int16_t setOnTime;
 
 		sIntegralVariables();
+		void reset();
 	};
 
 	eControlStatus mStatus;

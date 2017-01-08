@@ -58,10 +58,7 @@ void cTempControl::stop()
 	mHeater->reset();
 	mStatus = STOPPED;
 
-	mIntegral.offtime = 0;
-	mIntegral.onFlag = true;
-	mIntegral.ontime = 0;
-	mIntegral.setOnTime = 0;
+	mIntegral.reset();
 }
 
 void cTempControl::doIntegralControl(float temp)
@@ -174,6 +171,11 @@ cTempControl::~cTempControl()
 }
 
 cTempControl::sIntegralVariables::sIntegralVariables()
+{
+	reset();
+}
+
+void cTempControl::sIntegralVariables::reset()
 {
 	offtime = 0;
 	onFlag = true;
