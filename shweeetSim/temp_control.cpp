@@ -1,6 +1,4 @@
-#include <util/delay.h>
 
-#include <terminal.h>
 #include "temp_control.h"
 #include "nvm.h"
 
@@ -24,7 +22,7 @@ cTempControl::cTempControl(cHeater *heater, cLED *heaterled, cOutput *freezerRel
 	mCount = 3;
 	mSetPoint = eeprom_read_byte(ADDRES_SETPOINT);
 
-	mFreezerIntegral.onFlag = false;
+    mFreezerParam.onFlag = false;
 
 	bool started = eeprom_read_byte(ADDRES_CONTROLLING);
 	if(started)
@@ -38,10 +36,8 @@ void cTempControl::setHeater(bool state)
 	if(state)
 	{
 		mHeater->on();
-		
-		//NEVER have the heater AND Freezer on together
-        mFreezerRelay->reset();		 
-		 
+        mFreezerRelay->reset();
+        qDebug() << "Freezer OFF";
 		mStatus = HEATING;
 	}
 	else
@@ -63,8 +59,7 @@ void cTempControl::setFreezer(bool state)
 	if(state)
 	{
 		mFreezerRelay->set();
-		
-		 //NEVER have the heater AND Freezer on together
+        qDebug() << "Freezer ON";
         mHeater->reset();
         mHeater->off();
 		mStatus = COOLING;
@@ -72,6 +67,7 @@ void cTempControl::setFreezer(bool state)
 	else
 	{
 		mFreezerRelay->reset();
+        qDebug() << "Freezer OFF";
 
 		if(mStatus != HEATING)
 			mStatus = IDLE;
@@ -92,45 +88,45 @@ void cTempControl::stop()
 	mHeater->reset();
 	mStatus = STOPPED;
 
-	mHeaterIntegral.reset();
-	mFreezerIntegral.reset();
+    mHeaterParam.reset();
+    mFreezerParam.reset();
 }
 
 void cTempControl::doIntegralHeating(float temp)
 {
-	if(mHeaterIntegral.onFlag)
+    if(mHeaterParam.onFlag)
 	{
-		if(mHeaterIntegral.ontime-- > 0)
+        if(mHeaterParam.ontime-- > 0)
 			return;
-		mHeaterIntegral.onFlag = false;
+        mHeaterParam.onFlag = false;
 
-		mHeaterIntegral.offtime = HEATER_OFF_TIME;
+        mHeaterParam.offtime = HEATER_OFF_TIME;
 
 		setHeater(false);
 	}
 	else
 	{
-		if(mHeaterIntegral.offtime-- > 0)
+        if(mHeaterParam.offtime-- > 0)
 			return;
-		mHeaterIntegral.onFlag = true;
+        mHeaterParam.onFlag = true;
 
 		//Hysteresis of 0.4C
 		if((((float)mSetPoint - 0.2) >= temp) || (temp >= ((float)mSetPoint + 0.2)))
 		{
 			if(temp > (float)mSetPoint)
-				mHeaterIntegral.setOnTime--;
+                mHeaterParam.setOnTime--;
 			else
-				mHeaterIntegral.setOnTime++;
+                mHeaterParam.setOnTime++;
 
-			if(mHeaterIntegral.setOnTime < 0)
-				mHeaterIntegral.setOnTime = 0;
+            if(mHeaterParam.setOnTime < 0)
+                mHeaterParam.setOnTime = 0;
 		}
 
-		mHeaterIntegral.ontime = mHeaterIntegral.setOnTime;
+        mHeaterParam.ontime = mHeaterParam.setOnTime;
 
-		printp("Heater %03.1f - set %ds\n", temp, mHeaterIntegral.ontime);
+        printp("Heater %03.1f - set %ds", temp, mHeaterParam.ontime);
 
-		if(mHeaterIntegral.ontime)
+        if(mHeaterParam.ontime)
 		{
 			setHeater(true);
 		}
@@ -139,49 +135,49 @@ void cTempControl::doIntegralHeating(float temp)
 
 void cTempControl::doIntegralCooling(float temp)
 {
-	if(mFreezerIntegral.onFlag)
+    if(mFreezerParam.onFlag)
 	{
-		if(mFreezerIntegral.ontime-- > 0)
+        if(mFreezerParam.ontime-- > 0)
 			return;
-		mFreezerIntegral.onFlag = false;
+        mFreezerParam.onFlag = false;
 
-		mFreezerIntegral.offtime = FREEZER_OFF_TIME;
+        mFreezerParam.offtime = FREEZER_OFF_TIME;
 
 		setFreezer(false);
 	}
 	else
 	{
-		if(mFreezerIntegral.offtime-- > 0)
+        if(mFreezerParam.offtime-- > 0)
 			return;
-		mFreezerIntegral.onFlag = true;
+        mFreezerParam.onFlag = true;
 
 		//Hysteresis of 2C
 		if((((float)mSetPoint - 1) <= temp) || (temp <= ((float)mSetPoint + 1)))
 		{
 			if(temp < (float)mSetPoint)
-            {	mFreezerIntegral.setOnTime -= 60;
+            {	mFreezerParam.setOnTime -= 60;
 
-            if(mFreezerIntegral.setOnTime < FREEZER_MIN_TIME)
-                mFreezerIntegral.setOnTime = 0;
+            if(mFreezerParam.setOnTime < FREEZER_MIN_TIME)
+                mFreezerParam.setOnTime = 0;
             }
 			else
 			{
 				//start with minimim of 10m on
-				if(mFreezerIntegral.setOnTime == 0)
-					mFreezerIntegral.setOnTime = FREEZER_MIN_TIME;
+                if(mFreezerParam.setOnTime == 0)
+                    mFreezerParam.setOnTime = FREEZER_MIN_TIME;
 
-				mFreezerIntegral.setOnTime += FREEZER_INC_TIME;
+                mFreezerParam.setOnTime += FREEZER_INC_TIME;
 			}
 
-			if(mFreezerIntegral.setOnTime < 0)
-				mFreezerIntegral.setOnTime = 0;
+            if(mFreezerParam.setOnTime < 0)
+                mFreezerParam.setOnTime = 0;
 		}
 
-		mFreezerIntegral.ontime = mFreezerIntegral.setOnTime;
+        mFreezerParam.ontime = mFreezerParam.setOnTime;
 
-		printp("Freezer %03.1f - set %ds\n", temp, mFreezerIntegral.ontime);
+        printp("Freezer %03.1f - set %ds", temp, mFreezerParam.ontime);
 
-		if(mFreezerIntegral.ontime)
+        if(mFreezerParam.ontime)
 		{
 			setFreezer(true);
 		}
@@ -249,31 +245,31 @@ void cTempControl::run()
 		return;
 	mCount = SAMPLE_PERIOD;
 
-	uint8_t differentialControl = false;
+    mDifferential = false;
 
 	float temp = mProbe->getTemp();
 	if(temp < ((float)mSetPoint - 5.0))
 	{
 		setHeater(true);
-		differentialControl = true;
+        mDifferential = true;
 	}
 
 	if(temp > ((float)mSetPoint + 3.0))
 	{
 		setFreezer(true);
-		differentialControl = true;
+        mDifferential = true;
 	}
 
-	if(differentialControl)
+    if(mDifferential)
 		return;
 
 
 	//do NOT cool while we are still heating
-    if(mHeaterIntegral.setOnTime <= 0)
+    if(mHeaterParam.setOnTime <= 0)
 		doIntegralCooling(temp);
 
 	//do NOT heat while we are still cooling
-    if(mFreezerIntegral.setOnTime <= 0)
+    if(mFreezerParam.setOnTime <= 0)
 		doIntegralHeating(temp);
 
 
@@ -285,16 +281,5 @@ cTempControl::~cTempControl()
 {
 }
 
-cTempControl::sIntegralVariables::sIntegralVariables()
-{
-	reset();
-}
 
-void cTempControl::sIntegralVariables::reset()
-{
-	offtime = 0;
-	onFlag = true;
-	ontime = 0;
-	setOnTime = 0;
-}
 
