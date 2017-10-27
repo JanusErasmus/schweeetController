@@ -1,0 +1,3 @@
+[submodule "AVRutils"]
+	path = AVRutils
+	url = https://github.com/JanusErasmus/AVRutils.git
